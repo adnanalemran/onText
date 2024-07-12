@@ -1,17 +1,21 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import QueryProvider from "./components/provider/QueryProvider";
+ 
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "onTask App",
-  description: "A product of innerLab",
+  title: "onTask",
+  description: "a product of innerlab",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }
