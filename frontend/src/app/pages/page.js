@@ -1,10 +1,10 @@
-// pages/index.js
+
 import React from 'react';
 
 const Home = () => {
   return (
     <div>
-      <h1>Hello, World!</h1>
+      <h1>Hello, World! this new</h1>
     </div>
   );
 };
