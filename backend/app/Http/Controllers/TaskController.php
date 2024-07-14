@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
-
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 
 class TaskController extends Controller
 {
@@ -14,7 +14,10 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::all();
-        return response()->json(['status' => 'ok', 'tasks' => $tasks], 200);
+        return response()->json([
+            'status' => 'success',
+            'data' => $tasks
+        ], 200);
     }
 
     /**
@@ -22,32 +25,40 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Api hit  successfully'
+        ], 201);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'completed' => 'required|boolean',
-            'due_date' => 'required|date_format:Y-m-d',
-        ]);
-        $task = Task::create($request->all());
-
-
-
-        return response()->json(['message' => 'Task created successfully', 'task' => $task,], 201);
+        $validated = $request->validated();
+        $task = Task::create($validated);
+        return response()->json($task, 201);
     }
+
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show($id)
     {
-        //
+        $task = Task::find($id);
+        if (is_null($task)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Task not found'
+            ], 404);
+        }
+        return response()->json([
+            'status' => 'success',
+            'data' => $task
+
+        ], 200);
     }
 
     /**
@@ -58,19 +69,44 @@ class TaskController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTaskRequest $request, Task $task)
+
+    public function update(UpdateTaskRequest $request, $id)
     {
-        //
+        $validated = $request->validated();
+        $task = Task::find($id);
+        if (is_null($task)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Task not found'
+            ], 404);
+        }
+        $task->fill($validated);
+        $task->save();
+        return response()->json([
+            'status' => 'success',
+            'data' => $task
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    /**
+     * Remove the specified resource from storage.
+     */
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
     {
-        //
+        $task = Task::find($id);
+        if (is_null($task)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Task not found'
+            ], 404);
+        }
+        $task->delete();
+        return response()->json(['data' => 'delete data ! '], 204);
     }
 }
