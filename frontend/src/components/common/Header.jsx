@@ -14,7 +14,7 @@ const Header = () => {
                 </div>
 
                 <div className="navbar-end">
-                    status
+
                 </div>
             </div>
         </div>

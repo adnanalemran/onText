@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notes', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->longText('description')->unique();
+            $table->longText('description');
             $table->timestamps();
         });
     }

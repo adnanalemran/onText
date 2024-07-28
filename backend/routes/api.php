@@ -12,6 +12,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::prefix('v1')->group(function () {
-    Route::apiResource('tasks', 'App\Http\Controllers\TaskController');
+
     Route::post('note', [NoteController::class, 'store']);
+    Route::get('note/{title}', [NoteController::class, 'show']);
 });

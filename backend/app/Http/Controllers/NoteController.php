@@ -51,9 +51,14 @@ class NoteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Note $note)
+    public function show(Request $request, $title)
     {
-        //
+        $noteData = Note::where('title', $title)->first();
+
+        if (is_null($noteData)) {
+            return response()->json(["message" => " not found"], 404);
+        }
+        return response()->json($noteData, 200);
     }
 
     /**
