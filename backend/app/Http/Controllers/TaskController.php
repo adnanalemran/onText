@@ -54,8 +54,9 @@ class TaskController extends Controller
      */
     public function show($id)
     {
-        //for finding task by id
+        //for finding task by 
         $task = Task::find($id);
+
         //if task not found
         if (is_null($task)) {
             return response()->json([

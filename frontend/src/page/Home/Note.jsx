@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
-
+// import http from '../../http';
 const Note = () => {
     const { noteTitle } = useParams();
 
     const submitData = async () => {
         var title = noteTitle;
-        const canvasText = document.getElementById(1).value;
+        const description = document.getElementById(1).value;
         try {
-            console.log(title, canvasText);
 
-            // update data ref title 
+
+            // await http.put(`/tasks/${title}`, { description });
 
         }
         catch {
+            console.log(title, description);
             console.log('Create a data')
             //create data keep title 
         }
