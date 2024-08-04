@@ -23,6 +23,7 @@ const Note = () => {
     // Handle text area change
     const handleChange = (event) => {
         setDescription(event.target.value);
+        submitData();
     };
 
     // Submit data to the server
@@ -50,16 +51,13 @@ const Note = () => {
 
 
 
-    if (isPending) return 'Loading...'
     return (
         <div className='m-0 mx-auto'>
             <Helmet>
                 <title>{noteTitle} || Text Share</title>
                 <meta name="description" content="Keep and share your text" />
             </Helmet>
-            <button onClick={submitData}>
-                Save
-            </button>
+
             <div className="relative">
                 <div className='   bottom-7 absolute end-5 '> {updateStatus ? <div className=" w-3 h-3 p-1 rounded-full bg-green-500 drop-shadow-2x"></div> : <div className=" w-3 h-3 p-1 rounded-full bg-warning drop-shadow-2x"></div>}</div>
 
