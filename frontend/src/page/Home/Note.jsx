@@ -16,7 +16,12 @@ const Note = () => {
 
     //need fix  , data show undefined
 
+
     const [description, setDescription] = useState(`${data?.description}`);
+
+    useEffect(() => {
+        setDescription(`${data?.description}`);
+    }, [data]);
 
     const [updateStatus, setUpdateStatus] = useState(true);
 
