@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -6,21 +6,21 @@ import { useQuery } from '@tanstack/react-query';
 
 const Note = () => {
     const { noteTitle } = useParams();
-    const { isPending, error, data, refetch } = useQuery({
-        queryKey: ['repoData'],
+    const { data, refetch } = useQuery({
+        queryKey: ['repoData', noteTitle],
         queryFn: () =>
-            fetch(`http://127.0.0.1:8000/api/v1/note/${noteTitle}`).then((res) =>
+            fetch(`https://note.saracoverseas.com/public/v1/note/${noteTitle}`).then((res) =>
                 res.json(),
             ),
-    })
-
-    //need fix  , data show undefined
+    });
 
 
-    const [description, setDescription] = useState(`${data?.description}`);
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
-        setDescription(`${data?.description}`);
+        if (data && data.description !== undefined) {
+            setDescription(data.description);
+        }
     }, [data]);
 
     const [updateStatus, setUpdateStatus] = useState(true);
@@ -36,7 +36,7 @@ const Note = () => {
         const sendData = { title: noteTitle, description };
         try {
             setUpdateStatus(false);
-            const response = await axios.post('http://127.0.0.1:8000/api/v1/note', sendData);
+            const response = await axios.post('https://note.saracoverseas.com/public/api/v1/note', sendData);
             if (response.status === 201) {
                 setUpdateStatus(true);
                 refetch();
@@ -47,14 +47,9 @@ const Note = () => {
             console.error('Error saving data:', error);
             console.log('Error saving data');
         }
-    }, [noteTitle, description]);
+    }, [noteTitle, description, refetch]);
 
-
-    useEffect(() => {
-
-    }, [description, submitData]);
-
-
+    useEffect(() => { }, [description, submitData]);
 
     return (
         <div className='m-0 mx-auto'>
@@ -64,16 +59,20 @@ const Note = () => {
             </Helmet>
 
             <div className="relative">
-                <div className='   bottom-7 absolute end-5 '> {updateStatus ? <div className=" w-3 h-3 p-1 rounded-full bg-green-500 drop-shadow-2x"></div> : <div className=" w-3 h-3 p-1 rounded-full bg-warning drop-shadow-2x"></div>}</div>
-
+                <div className='bottom-7 absolute end-5'>
+                    {updateStatus ? (
+                        <div className="w-3 h-3 p-1 rounded-full bg-green-500 drop-shadow-2x"></div>
+                    ) : (
+                        <div className="w-3 h-3 p-1 rounded-full bg-warning drop-shadow-2x"></div>
+                    )}
+                </div>
             </div>
 
             <textarea
+                placeholder='Start typing here...'
                 rows={20}
-                // defaultValue={data?.description}
                 value={description}
                 onChange={handleChange}
-
                 className='w-full h-[85vh] p-2 m-0'
             />
         </div>
