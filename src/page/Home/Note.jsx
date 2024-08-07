@@ -9,12 +9,10 @@ const Note = () => {
     const { data, refetch } = useQuery({
         queryKey: ['repoData', noteTitle],
         queryFn: () =>
-            fetch(`https://note.saracoverseas.com/public/v1/note/${noteTitle}`).then((res) =>
+            fetch(`https://note.saracoverseas.com/public/api/v1/note/${noteTitle}`).then((res) =>
                 res.json(),
             ),
     });
-
-
     const [description, setDescription] = useState('');
 
     useEffect(() => {
@@ -36,7 +34,7 @@ const Note = () => {
         const sendData = { title: noteTitle, description };
         try {
             setUpdateStatus(false);
-            const response = await axios.post('https://note.saracoverseas.com/public/api/v1/note', sendData);
+            const response = await axios.post('https://note.saracoverseas.com/public/api/v1/note/', sendData);
             if (response.status === 201) {
                 setUpdateStatus(true);
                 refetch();
