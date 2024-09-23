@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
-import { FaSave, FaCopy, FaFileExport, FaFileDownload, FaFilePdf } from 'react-icons/fa';
+import { FaSave, FaCopy, FaFileDownload, FaFilePdf } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
 const socket = io('http://localhost:5000'); // Your backend URL
 
@@ -11,7 +11,7 @@ const Note = () => {
     const { title } = useParams();
     const [description, setDescription] = useState('');
     const [updateStatus, setUpdateStatus] = useState(true);
-    const [showExportOptions, setShowExportOptions] = useState(false);
+
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -83,7 +83,7 @@ const Note = () => {
     }, [title]);
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-950 text-white">
+        <div className="max-h-screen  flex flex-col min-h-screen bg-gray-900 text-white">
             {/* Header */}
             <header className="bg-gray-800 px-4 py-2 shadow-md flex justify-between items-center ">
                 <h1 className="text-2xl font-bold">{title}</h1>
@@ -99,10 +99,10 @@ const Note = () => {
                     </div>
                     <button
                         onClick={handleSave}
-                        className={`text-xs px-4 py-3 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                        className={`text-xs px-4 py-3 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
                         disabled={updateStatus} // Disable the button when saved
                     >
-                        <FaSave className="inline-block mr-2" /> {updateStatus ? 'Saved' : 'Save'}
+                        <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
                     </button>
 
 
@@ -135,16 +135,14 @@ const Note = () => {
             </header>
 
             {/* Main Content */}
-            <div className="flex flex-1  ">
+            <div className="flex flex-1 pb-7 ">
                 <div className="w-full   mx-auto     shadow-lg">
-
-
                     <textarea
                         placeholder='Start typing here...'
                         rows={20}
                         value={description}
                         onChange={handleChange}
-                        className='w-full min-h-[91vh] p-2 bg-gray-900      focus:outline-none focus:ring-2 focus:ring-transparent resize-none'
+                        className='w-full min-h-full p-2 bg-gray-900      focus:outline-none focus:ring-2 focus:ring-transparent resize-none text-sm'
                     />
 
                 </div>
@@ -161,6 +159,10 @@ const Note = () => {
                     },
                 }}
             />
+            <div className="bg-gray-900 text-gray-600 p-1 text-center text-xs absolute  bottom-0  w-full">
+                <p>Developed by Adnan al Emran | Inspired by the CodeShare community.</p>
+            </div>
+
         </div>
     );
 };
