@@ -22,7 +22,7 @@ const Note = () => {
                 }
             } catch (error) {
                 console.error('Error fetching note:', error);
-                toast.error('Error fetching note.');
+              
             }
         };
 
@@ -42,7 +42,7 @@ const Note = () => {
             const response = await axios.post('http://localhost:5000/note', sendData);
             if (response.status === 201 || response.status === 200) {
                 setUpdateStatus(true);
-                toast.success('Note saved successfully!');
+                toast.success('Cloud saved successfully!');
             }
         } catch (error) {
             console.error('Error saving data:', error);
@@ -51,7 +51,7 @@ const Note = () => {
 
     const handleCopy = () => {
         navigator.clipboard.writeText(description);
-        toast.success('Note copied to clipboard!');
+        toast.success('Text copied to clipboard!');
     };
 
     const handleExportTxt = () => {
