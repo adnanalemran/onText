@@ -87,52 +87,56 @@ const Note = () => {
             {/* Header */}
             <header className="bg-gray-800 px-4 py-2 shadow-md flex justify-between items-center ">
                 <h1 className="text-2xl font-bold">{title}</h1>
-                <div className="mb-2  text-sm">
-                    {updateStatus ? (
-                        <span className="text-green-400">Saved successfully</span>
-                    ) : (
-                        <span className="text-yellow-500">* Unsaved changes, click save </span>
-                    )}
-                </div>
+
 
                 <div className="flex justify-between items-center  gap-2">
+                    <div className="  text-sm">
+                        {updateStatus ? (
+                            <span className="text-neutral-500">DB store successfully</span>
+                        ) : (
+                            <span className=" ">Unsaved changes, click save </span>
+                        )}
+                    </div>
                     <button
                         onClick={handleSave}
-                        className={`bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition ${updateStatus ? 'border-green-500' : 'border-yellow-500'}`}
+                        className={`text-xs px-4 py-3 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                        disabled={updateStatus} // Disable the button when saved
                     >
-                        <FaSave className="inline-block mr-2" /> Save
+                        <FaSave className="inline-block mr-2" /> {updateStatus ? 'Saved' : 'Save'}
                     </button>
+
+
                     <button
                         onClick={handleCopy}
-                        className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+                        className="text-xs bg-slate-700 text-white px-4 py-3 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaCopy className="inline-block mr-2" /> Copy
                     </button>
                     <div className=" ">
-                         
-                         
-                            <div className="  right-0 flex  gap-1  shadow-lg">
-                                <button
-                                    onClick={handleExportTxt}
-                                    className="w-full text-left p-2 bg-gray-600   rounded-lg  hover:bg-gray-500 transition flex items-center text-white"
-                                >
-                                    <FaFileDownload className="inline-block mr-2" /> .txt
-                                </button>
-                                <button
-                                    onClick={handleExportPdf}
-                                    className="w-full text-left p-2 bg-gray-600   rounded-lg  hover:bg-gray-500transition flex items-center text-white"
-                                >
-                                    <FaFilePdf className="inline-block mr-2" /> .pdf
-                                </button>
-                            </div>
-                        
+
+
+                        <div className="  right-0 flex  gap-1  shadow-lg">
+                            <button
+                                onClick={handleExportTxt}
+                                className="text-xs bg-slate-700   px-4 py-3     w-full text-left p-2    rounded-lg  hover:slate-800 transition flex items-center text-white"
+                            >
+                                <FaFileDownload className="inline-block mr-2" /> .txt
+                            </button>
+                            <button
+                                onClick={handleExportPdf}
+                                className="text-xs bg-slate-700   px-4 py-3     w-full text-left p-2    rounded-lg  hover:slate-800 transition flex items-center text-white"
+                            >
+                                <FaFilePdf className="inline-block mr-2" /> .pdf
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
             <div className="flex flex-1  ">
-                <div className="w-full   mx-auto   p-6   shadow-lg">
+                <div className="w-full   mx-auto     shadow-lg">
 
 
                     <textarea
@@ -140,7 +144,7 @@ const Note = () => {
                         rows={20}
                         value={description}
                         onChange={handleChange}
-                        className='w-full min-h-[85vh] p-4 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+                        className='w-full min-h-[91vh] p-2 bg-gray-900      focus:outline-none focus:ring-2 focus:ring-transparent resize-none'
                     />
 
                 </div>
@@ -149,6 +153,13 @@ const Note = () => {
             <Toaster
                 position="top-center"
                 reverseOrder={false}
+                gutter={8}
+                toastOptions={{
+                    style: {
+                        background: '#0a0a23', // Set background color to black
+                        color: 'white', // Optional: Set text color to white for better contrast
+                    },
+                }}
             />
         </div>
     );
