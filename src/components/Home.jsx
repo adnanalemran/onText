@@ -9,7 +9,7 @@ const Home = () => {
     const randomNumber = getRandomNumber(); // Call the function to get a random number
 
     return (
-        <div className="flex flex-col items-center justify-center mt-16 p-6  rounded-lg  ">
+        <div className="flex flex-col items-center justify-center mt-12 p-6  rounded-lg  ">
             <h2 className="lg:text-4xl text-2xl font-bold mb-6 text-center text-gray-300">
                 Save Your Text and Share It with Others
             </h2>
@@ -37,6 +37,9 @@ const Home = () => {
                     <li>Click the link anytime to retrieve your saved text.</li>
                 </ul>
             </div>
+            <p className="mt-6 text-gray-500">
+                Its completely free no ads no tracking no cookies  just a simple text sharing service
+            </p>
 
 
         </div>
