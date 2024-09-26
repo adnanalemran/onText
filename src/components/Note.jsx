@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
-import { FaSave, FaCopy, FaFileDownload, FaFilePdf } from 'react-icons/fa';
+import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
-
 
 const Note = () => {
     const { title } = useParams();
@@ -25,14 +23,11 @@ const Note = () => {
         };
 
         fetchNote();
-
-
     }, [title]);
 
     const handleChange = (event) => {
         const newDescription = event.target.value;
         setDescription(newDescription);
-
         setUpdateStatus(false);
     };
 
@@ -70,12 +65,30 @@ const Note = () => {
         toast.success('.pdf file exported!');
     };
 
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: title,
+                    text: description,
+                    url: window.location.href,
+                });
+                toast.success('Note shared successfully!');
+            } catch (error) {
+                console.error('Error sharing:', error);
+                toast.error('Error sharing the note.');
+            }
+        } else {
+            toast.error('Sharing is not supported in this browser.');
+        }
+    };
+
     return (
         <div className="max-h-screen flex flex-col min-h-screen bg-gray-900 text-white">
-            <header className="bg-gray-800 px-4 py-2 shadow-md flex justify-between items-center">
-                <h1 className="text-2xl font-bold">{title}</h1>
-                <div className="flex justify-between items-center gap-2">
-                    <div className="text-sm">
+            <header className="bg-gray-800 px-4 py-2 shadow-md flex flex-col md:flex-row justify-between items-center">
+                <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
+                <div className="flex  flex-row justify-between items-center gap-2">
+                    <div className="lg:text-sm hidden">
                         {updateStatus ? (
                             <span className="text-neutral-500">DB store successfully</span>
                         ) : (
@@ -84,31 +97,37 @@ const Note = () => {
                     </div>
                     <button
                         onClick={handleSave}
-                        className={`text-xs px-4 py-3 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+                        className={`text-xs px-4 py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
                         disabled={updateStatus}
                     >
                         <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
                     </button>
                     <button
                         onClick={handleCopy}
-                        className="text-xs bg-slate-700 text-white px-4 py-3 rounded-lg hover:bg-slate-900 transition"
+                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaCopy className="inline-block mr-2" /> Copy
                     </button>
-                    <div className="right-0 flex gap-1 shadow-lg">
-                        <button
-                            onClick={handleExportTxt}
-                            className="text-xs bg-slate-700 px-4 py-3 w-full text-left p-2 rounded-lg hover:slate-800 transition flex items-center text-white"
-                        >
-                            <FaFileDownload className="inline-block mr-2" /> .txt
-                        </button>
-                        <button
-                            onClick={handleExportPdf}
-                            className="text-xs bg-slate-700 px-4 py-3 w-full text-left p-2 rounded-lg hover:slate-800 transition flex items-center text-white"
-                        >
-                            <FaFilePdf className="inline-block mr-2" /> .pdf
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleShare}
+                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                    >
+                        <FaShare className="inline-block mr-2" /> Share
+                    </button>
+
+                    <button
+                        onClick={handleExportTxt}
+                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                    >
+                        <FaFileDownload className="inline-block mr-2" /> <p> .txt</p>
+                    </button>
+                    <button
+                        onClick={handleExportPdf}
+                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                    >
+                        <FaFilePdf className="inline-block mr-2" /> .pdf
+                    </button>
+
                 </div>
             </header>
 
@@ -136,7 +155,7 @@ const Note = () => {
                 }}
             />
             <div className="bg-gray-900 text-gray-600 p-1 text-center text-xs absolute bottom-0 w-full">
-                <a href='https://github.com/adnanalemran'>Developed by Adnan al Emran  </a>
+                <a href='https://github.com/adnanalemran'>Developed by Adnan al Emran</a>
             </div>
         </div>
     );
