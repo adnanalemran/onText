@@ -19,7 +19,7 @@ const Note = () => {
             }
         } catch (error) {
             console.error('Error fetching note:', error);
-            toast.error('Error fetching the note.');
+
         }
     };
 
