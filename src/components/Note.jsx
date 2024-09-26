@@ -104,26 +104,26 @@ const Note = () => {
                     </button>
                     <button
                         onClick={handleCopy}
-                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaCopy className="inline-block mr-2" /> Copy
                     </button>
                     <button
                         onClick={handleShare}
-                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaShare className="inline-block mr-2" /> Share
                     </button>
 
                     <button
                         onClick={handleExportTxt}
-                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
-                        <FaFileDownload className="inline-block mr-2" /> <p> .txt</p>
+                        <FaFileDownload className="inline-block mr-2" />   .txt
                     </button>
                     <button
                         onClick={handleExportPdf}
-                        className="text-xs bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 transition"
+                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaFilePdf className="inline-block mr-2" /> .pdf
                     </button>
