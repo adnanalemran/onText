@@ -28,7 +28,7 @@ const Home = () => {
                 Just save, copy, or remember the link to access your text later.
             </p>
 
-            <div className="mt-14 p-4 border border-gray-300 rounded-lg  shadow-sm hidden lg:inline">
+            <div className="mt-14 p-4 border border-gray-300 rounded-lg  shadow-sm ">
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">How to Use:</h3>
                 <ul className="list-disc list-inside text-gray-600">
                     <li>Click the <strong>Share Text Now</strong> button to create your unique link.</li>
