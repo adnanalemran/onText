@@ -86,7 +86,7 @@ const Note = () => {
     return (
         <div className="max-h-screen flex flex-col min-h-screen bg-gray-900 text-white">
             <header className="bg-gray-800 px-4 py-2 shadow-md flex flex-col md:flex-row justify-between items-center">
-                <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
+                <h1 className="text-3xl lg:text-2xl font-bold pb-2 lg:pb-0">{title}</h1>
                 <div className="flex  flex-row justify-between items-center gap-2">
                     <div className="lg:text-sm hidden">
                         {updateStatus ? (
@@ -97,7 +97,7 @@ const Note = () => {
                     </div>
                     <button
                         onClick={handleSave}
-                        className={`text-xs px-4 py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+                        className={`text-xs  lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
                         disabled={updateStatus}
                     >
                         <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
