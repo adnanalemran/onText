@@ -166,7 +166,7 @@ const Note = () => {
                 }}
             />
             <div className="bg-gray-900 text-gray-600 p-1 text-center text-xs absolute bottom-0 w-full">
-                <a href='https://github.com/adnanalemran'>Developed by Adnan al Emran</a>
+                <a href='https://github.com/adnanalemran'>Developed by Adnan al Emran || 2024</a>
             </div>
         </div>
     );
