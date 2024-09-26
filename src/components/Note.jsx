@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
-import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare } from 'react-icons/fa';
+import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync } from 'react-icons/fa'; // Import the refresh icon
 import { toast, Toaster } from 'react-hot-toast';
 
 const Note = () => {
@@ -10,18 +10,20 @@ const Note = () => {
     const [description, setDescription] = useState('');
     const [updateStatus, setUpdateStatus] = useState(true);
 
-    useEffect(() => {
-        const fetchNote = async () => {
-            try {
-                const response = await axios.get(`https://textapp-eight.vercel.app/note/${title}`);
-                if (response.data) {
-                    setDescription(response.data.description);
-                }
-            } catch (error) {
-                console.error('Error fetching note:', error);
+    const fetchNote = async () => {
+        try {
+            const response = await axios.get(`https://textapp-eight.vercel.app/note/${title}`);
+            if (response.data) {
+                setDescription(response.data.description);
+                setUpdateStatus(true); // Reset update status when fetching note
             }
-        };
+        } catch (error) {
+            console.error('Error fetching note:', error);
+            toast.error('Error fetching the note.');
+        }
+    };
 
+    useEffect(() => {
         fetchNote();
     }, [title]);
 
@@ -83,11 +85,15 @@ const Note = () => {
         }
     };
 
+    const handleRefresh = () => {
+        fetchNote(); // Call the fetchNote function to refresh the data
+    };
+
     return (
         <div className="max-h-screen flex flex-col min-h-screen bg-gray-900 text-white">
             <header className="bg-gray-800 px-4 py-2 shadow-md flex flex-col md:flex-row justify-between items-center">
                 <h1 className="text-3xl lg:text-2xl font-bold pb-2 lg:pb-0">{title}</h1>
-                <div className="flex  flex-row justify-between items-center gap-2">
+                <div className="flex flex-row justify-between items-center gap-2">
                     <div className="lg:text-sm hidden">
                         {updateStatus ? (
                             <span className="text-neutral-500">DB store successfully</span>
@@ -97,7 +103,7 @@ const Note = () => {
                     </div>
                     <button
                         onClick={handleSave}
-                        className={`text-xs  lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+                        className={`text-xs lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
                         disabled={updateStatus}
                     >
                         <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
@@ -114,12 +120,11 @@ const Note = () => {
                     >
                         <FaShare className="inline-block mr-2" /> Share
                     </button>
-
                     <button
                         onClick={handleExportTxt}
                         className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
-                        <FaFileDownload className="inline-block mr-2" />   .txt
+                        <FaFileDownload className="inline-block mr-2" /> .txt
                     </button>
                     <button
                         onClick={handleExportPdf}
@@ -127,7 +132,13 @@ const Note = () => {
                     >
                         <FaFilePdf className="inline-block mr-2" /> .pdf
                     </button>
-
+                    {/* Refresh Button */}
+                    <button
+                        onClick={handleRefresh}
+                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
+                    >
+                        <FaSync className="inline-block mr-2" /> Refresh
+                    </button>
                 </div>
             </header>
 
