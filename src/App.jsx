@@ -1,9 +1,9 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Note from './components/Note';
 import Welcome from './components/Welcome';
- 
- 
+
+
 
 const App = () => {
     return (

@@ -2,24 +2,24 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
-import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync } from 'react-icons/fa'; // Import the refresh icon
+import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
-
+import QRCode from 'qrcode';
 const Note = () => {
     const { title } = useParams();
     const [description, setDescription] = useState('');
     const [updateStatus, setUpdateStatus] = useState(true);
+    const [isAutoSave, setIsAutoSave] = useState(true); // Toggle for auto-save
 
     const fetchNote = async () => {
         try {
             const response = await axios.get(`https://textapp-eight.vercel.app/note/${title}`);
             if (response.data) {
                 setDescription(response.data.description);
-                setUpdateStatus(true); // Reset update status when fetching note
+                setUpdateStatus(true);
             }
         } catch (error) {
             console.error('Error fetching note:', error);
-
         }
     };
 
@@ -28,21 +28,38 @@ const Note = () => {
     }, [title]);
 
     const handleChange = (event) => {
-        const newDescription = event.target.value;
-        setDescription(newDescription);
+        setDescription(event.target.value);
         setUpdateStatus(false);
     };
 
-    const handleSave = async () => {
+    const handleSave = async (isManual = false) => {
         const sendData = { title, description };
         try {
             const response = await axios.post('https://textapp-eight.vercel.app/note', sendData);
             if (response.status === 201 || response.status === 200) {
                 setUpdateStatus(true);
-                toast.success('Cloud saved successfully!');
+                if (isManual) { // Only show toast for manual save
+                    toast.success('Cloud saved successfully!');
+                }
             }
         } catch (error) {
             console.error('Error saving data:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (isAutoSave && !updateStatus) {
+            const autoSaveInterval = setTimeout(async () => {
+                await handleSave(); // Auto-save will not show a toast
+            }, 200);
+            return () => clearTimeout(autoSaveInterval);
+        }
+    }, [description, isAutoSave, updateStatus]);
+
+    const handleToggleAutoSave = () => {
+        setIsAutoSave(!isAutoSave);
+        if (isAutoSave) {
+            toast('Unsaved changes! Please save manually.', { icon: '⚠️' });
         }
     };
 
@@ -60,12 +77,103 @@ const Note = () => {
         toast.success('.txt file exported!');
     };
 
-    const handleExportPdf = () => {
-        const pdf = new jsPDF();
-        pdf.text(description, 10, 10);
-        pdf.save(`${title}.pdf`);
+
+
+
+
+
+    // Function to format date to dd/mm/yyyy and time to HH:MM:SS AM/PM
+    const formatDateTime = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        // Format time to HH:MM:SS AM/PM
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12; // Convert to 12-hour format
+        hours = hours ? String(hours).padStart(2, '0') : '12'; // the hour '0' should be '12'
+
+        const formattedDate = `${day}/${month}/${year}`;
+        const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+        return { formattedDate, formattedTime };
+    };
+
+    const handleExportPdf = async () => {
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            putOnlyUsedFonts: true,
+        });
+
+        // Set the title
+        pdf.setFontSize(18);
+        pdf.text(title, 10, 10); // Add title at the top
+
+        // Set font size for the description
+        pdf.setFontSize(12);
+
+        // Add the description text
+        const pageHeight = pdf.internal.pageSize.height; // Get the height of the PDF page
+        const margin = 10; // Set a margin
+        const textLines = pdf.splitTextToSize(description, pdf.internal.pageSize.width - margin * 2); // Split the text into lines
+
+        let y = 20; // Starting Y position for the text
+
+        for (let i = 0; i < textLines.length; i++) {
+            if (y + 10 > pageHeight - margin - 60) { // Check if adding the next line exceeds the page height before footer
+                pdf.addPage(); // Add a new page
+                y = 20; // Reset Y position to 20
+            }
+            pdf.text(textLines[i], margin, y); // Add text line to the PDF
+            y += 10; // Move Y position down for the next line
+        }
+
+        // Add the export date and time
+        const { formattedDate, formattedTime } = formatDateTime(new Date()); // Get current date and time
+        const url = window.location.href; // Get the current URL
+
+        pdf.setFontSize(10); // Smaller font size for footer
+        const footerY = pageHeight - margin - 20; // Position Y for the footer 20px from the bottom
+        const footerText1 = `Exported on: ${formattedDate} ${formattedTime}`; // Export date and time
+        const footerText2 = `URL: ${url}`; // Current URL
+
+        // Calculate width for right alignment
+        const footerTextWidth1 = pdf.getTextWidth(footerText1);
+        const footerTextWidth2 = pdf.getTextWidth(footerText2);
+        const footerWidth = Math.max(footerTextWidth1, footerTextWidth2); // Use the wider footer text for positioning
+        const footerX = pdf.internal.pageSize.width - footerWidth - margin; // Right-align footer text with margin
+
+        // Add footer texts
+
+        pdf.text(footerText2, footerX, footerY + 5); // Position second footer line slightly below the first
+        pdf.text(footerText1, footerX, footerY);
+        // Generate QR code
+        try {
+            const qrCodeDataUrl = await QRCode.toDataURL(url, {
+                errorCorrectionLevel: 'H',
+                width: 50,
+            });
+
+            const qrCodeX = pdf.internal.pageSize.width - margin - 50; // Position QR code 10px from the right margin
+            const qrCodeY = footerY - 10 - 50; // Position QR code 10px above the footer and 50px high
+
+            // Add QR code image to the PDF
+            pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, 50, 50); // Adjust Y to position QR code above the footer
+        } catch (err) {
+            console.error('Error generating QR code:', err);
+        }
+
+        pdf.save(`${title}.pdf`); // Save the PDF with the title
         toast.success('.pdf file exported!');
     };
+
+
+
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -101,13 +209,16 @@ const Note = () => {
                             <span>Unsaved changes, click save</span>
                         )}
                     </div>
-                    <button
-                        onClick={handleSave}
-                        className={`text-xs lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
-                        disabled={updateStatus}
-                    >
-                        <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
-                    </button>
+                    {/* Conditional render of the save button */}
+                    {!isAutoSave && (
+                        <button
+                            onClick={() => handleSave(true)} // Pass true for manual save
+                            className={`text-xs lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+                            disabled={updateStatus}
+                        >
+                            <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
+                        </button>
+                    )}
                     <button
                         onClick={handleCopy}
                         className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
@@ -132,13 +243,23 @@ const Note = () => {
                     >
                         <FaFilePdf className="inline-block mr-2" /> .pdf
                     </button>
-                    {/* Refresh Button */}
                     <button
                         onClick={handleRefresh}
                         className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
                     >
                         <FaSync className="inline-block mr-2" /> Refresh
                     </button>
+                    {/* Auto Save Toggle */}
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={isAutoSave}
+                            onChange={handleToggleAutoSave}
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Auto Save</span>
+                    </label>
                 </div>
             </header>
 
@@ -155,7 +276,7 @@ const Note = () => {
             </div>
 
             <Toaster
-                position="top-center"
+                position="bottom-right"
                 reverseOrder={false}
                 gutter={8}
                 toastOptions={{
