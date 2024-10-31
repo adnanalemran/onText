@@ -235,7 +235,7 @@ const Note = () => {
                         <FaSync className="inline-block mr-2" /> Refresh
                     </button>
                     {/* Auto Save Toggle */}
-                    <label className="inline-flex items-center cursor-pointer">
+                    <label className="hidden lg:inline-flex items-center cursor-pointer">
                         <input
                             type="checkbox"
                             className="sr-only peer"
