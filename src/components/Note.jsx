@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
-import QRCode from 'qrcode';
+
 const Note = () => {
     const { title } = useParams();
     const [description, setDescription] = useState('');
     const [updateStatus, setUpdateStatus] = useState(true);
     const [isAutoSave, setIsAutoSave] = useState(true); // Toggle for auto-save
 
-    const fetchNote = async () => {
+    const fetchNote = useCallback(async () => {
         try {
             const response = await axios.get(`https://textapp-eight.vercel.app/note/${title}`);
             if (response.data) {
@@ -21,18 +21,18 @@ const Note = () => {
         } catch (error) {
             console.error('Error fetching note:', error);
         }
-    };
+    }, [title]);
 
     useEffect(() => {
         fetchNote();
-    }, [title]);
+    }, [title, fetchNote]);
 
     const handleChange = (event) => {
         setDescription(event.target.value);
         setUpdateStatus(false);
     };
 
-    const handleSave = async (isManual = false) => {
+    const handleSave = useCallback(async (isManual = false) => {
         const sendData = { title, description };
         try {
             const response = await axios.post('https://textapp-eight.vercel.app/note', sendData);
@@ -45,7 +45,7 @@ const Note = () => {
         } catch (error) {
             console.error('Error saving data:', error);
         }
-    };
+    }, [title, description]);
 
     useEffect(() => {
         if (isAutoSave && !updateStatus) {
@@ -54,7 +54,7 @@ const Note = () => {
             }, 200);
             return () => clearTimeout(autoSaveInterval);
         }
-    }, [description, isAutoSave, updateStatus]);
+    }, [description, isAutoSave, updateStatus, handleSave]);
 
     const handleToggleAutoSave = () => {
         setIsAutoSave(!isAutoSave);
@@ -78,10 +78,6 @@ const Note = () => {
     };
 
 
-
-
-
-
     // Function to format date to dd/mm/yyyy and time to HH:MM:SS AM/PM
     const formatDateTime = (date) => {
         const day = String(date.getDate()).padStart(2, '0');
@@ -102,7 +98,7 @@ const Note = () => {
         return { formattedDate, formattedTime };
     };
 
-    const handleExportPdf = async () => {
+    const handleExportPdf = () => {
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
@@ -119,7 +115,7 @@ const Note = () => {
 
         // Add the description text
         const pageHeight = pdf.internal.pageSize.height; // Get the height of the PDF page
-        const margin = 10; // Set a margin
+        const margin = 5; // Set a margin
         const textLines = pdf.splitTextToSize(description, pdf.internal.pageSize.width - margin * 2); // Split the text into lines
 
         let y = 20; // Starting Y position for the text
@@ -127,7 +123,7 @@ const Note = () => {
         for (let i = 0; i < textLines.length; i++) {
             if (y + 10 > pageHeight - margin - 60) { // Check if adding the next line exceeds the page height before footer
                 pdf.addPage(); // Add a new page
-                y = 20; // Reset Y position to 20
+                y = 10; // Reset Y position to 10
             }
             pdf.text(textLines[i], margin, y); // Add text line to the PDF
             y += 10; // Move Y position down for the next line
@@ -138,35 +134,24 @@ const Note = () => {
         const url = window.location.href; // Get the current URL
 
         pdf.setFontSize(10); // Smaller font size for footer
-        const footerY = pageHeight - margin - 20; // Position Y for the footer 20px from the bottom
-        const footerText1 = `Exported on: ${formattedDate} ${formattedTime}`; // Export date and time
-        const footerText2 = `URL: ${url}`; // Current URL
+        const footerY = pageHeight - margin - 10; // Position Y for the footer 10px from the bottom
 
+        const footerText2 = `URL: ${url}`; // Current URL
+        const createdByText = "Thank you for use onText :) "; // Add creator text
+        const footerText1 = `Exported on: ${formattedDate} ${formattedTime}`; // Export date and time
         // Calculate width for right alignment
-        const footerTextWidth1 = pdf.getTextWidth(footerText1);
+
         const footerTextWidth2 = pdf.getTextWidth(footerText2);
-        const footerWidth = Math.max(footerTextWidth1, footerTextWidth2); // Use the wider footer text for positioning
+        const createdByTextWidth = pdf.getTextWidth(createdByText);
+        const footerTextWidth1 = pdf.getTextWidth(footerText1);
+        const footerWidth = Math.max(footerTextWidth1, footerTextWidth2, createdByTextWidth); // Use the wider text for positioning
         const footerX = pdf.internal.pageSize.width - footerWidth - margin; // Right-align footer text with margin
 
         // Add footer texts
+        pdf.text(createdByText, footerX, footerY + 10); // Created by text
+        pdf.text(footerText1, footerX, footerY); // Export date and time
+        pdf.text(footerText2, footerX, footerY + 5); // Current URL
 
-        pdf.text(footerText2, footerX, footerY + 5); // Position second footer line slightly below the first
-        pdf.text(footerText1, footerX, footerY);
-        // Generate QR code
-        try {
-            const qrCodeDataUrl = await QRCode.toDataURL(url, {
-                errorCorrectionLevel: 'H',
-                width: 50,
-            });
-
-            const qrCodeX = pdf.internal.pageSize.width - margin - 50; // Position QR code 10px from the right margin
-            const qrCodeY = footerY - 10 - 50; // Position QR code 10px above the footer and 50px high
-
-            // Add QR code image to the PDF
-            pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, 50, 50); // Adjust Y to position QR code above the footer
-        } catch (err) {
-            console.error('Error generating QR code:', err);
-        }
 
         pdf.save(`${title}.pdf`); // Save the PDF with the title
         toast.success('.pdf file exported!');
