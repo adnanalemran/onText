@@ -35,7 +35,7 @@ const UserGuide = () => {
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 flex-1 overflow-auto p-4 lg:p-6">
+            <main className="relative z-10 flex-1 overflow-auto p-4 lg:p-6 custom-scrollbar">
                 <div className="max-w-4xl mx-auto space-y-8">
                     {/* Hero Section */}
                     <div className="text-center space-y-4">
