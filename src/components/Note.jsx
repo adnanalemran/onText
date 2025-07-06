@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
-import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync } from 'react-icons/fa';
+import { FaSave, FaCopy, FaFileDownload, FaFilePdf, FaShare, FaSync, FaHome } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
 
 const Note = () => {
@@ -39,7 +39,7 @@ const Note = () => {
             if (response.status === 201 || response.status === 200) {
                 setUpdateStatus(true);
                 if (isManual) { // Only show toast for manual save
-                    toast.success('Cloud saved successfully!');
+                    toast.success('Saved successfully!');
                 }
             }
         } catch (error) {
@@ -59,13 +59,15 @@ const Note = () => {
     const handleToggleAutoSave = () => {
         setIsAutoSave(!isAutoSave);
         if (isAutoSave) {
-            toast('Unsaved changes! Please save manually.', { icon: '⚠️' });
+            toast('Auto-save disabled. Save manually.', { icon: '⚠️' });
+        } else {
+            toast('Auto-save enabled!', { icon: '✅' });
         }
     };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(description);
-        toast.success('Text copied to clipboard!');
+        toast.success('Copied to clipboard!');
     };
 
     const handleExportTxt = () => {
@@ -74,9 +76,8 @@ const Note = () => {
         link.href = URL.createObjectURL(blob);
         link.download = `${title}.txt`;
         link.click();
-        toast.success('.txt file exported!');
+        toast.success('TXT file downloaded!');
     };
-
 
     // Function to format date to dd/mm/yyyy and time to HH:MM:SS AM/PM
     const formatDateTime = (date) => {
@@ -152,13 +153,9 @@ const Note = () => {
         pdf.text(footerText1, footerX, footerY); // Export date and time
         pdf.text(footerText2, footerX, footerY + 5); // Current URL
 
-
         pdf.save(`${title}.pdf`); // Save the PDF with the title
-        toast.success('.pdf file exported!');
+        toast.success('PDF file downloaded!');
     };
-
-
-
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -168,13 +165,13 @@ const Note = () => {
                     text: description,
                     url: window.location.href,
                 });
-                toast.success('Note shared successfully!');
+                toast.success('Shared successfully!');
             } catch (error) {
                 console.error('Error sharing:', error);
-                toast.error('Error sharing the note.');
+                toast.error('Sharing failed.');
             }
         } else {
-            toast.error('Sharing is not supported in this browser.');
+            toast.error('Sharing not supported.');
         }
     };
 
@@ -183,97 +180,164 @@ const Note = () => {
     };
 
     return (
-        <div className="max-h-screen flex flex-col min-h-screen bg-gray-900 text-white">
-            <header className="bg-gray-800 px-4 py-2 shadow-md flex flex-col md:flex-row justify-between items-center">
-                <h1 className="text-3xl lg:text-2xl font-bold pb-2 lg:pb-0">{title}</h1>
-                <div className="flex flex-row justify-between items-center gap-2">
-                    <div className="lg:text-sm hidden">
+        <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }}></div>
+            </div>
+
+            {/* Header */}
+            <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/10">
+                <div className="flex items-center space-x-3">
+                    <a 
+                        href="/" 
+                        className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors duration-300"
+                        title="Go Home"
+                    >
+                        <FaHome className="w-4 h-4" />
+                    </a>
+                    <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">T</span>
+                        </div>
+                        <span className="text-lg font-medium text-gray-300">onText</span>
+                    </div>
+                    <span className="text-sm text-gray-500 font-mono">/{title}</span>
+                </div>
+
+                {/* Status and Controls */}
+                <div className="flex items-center space-x-3">
+                    {/* Save Status */}
+                    <div className="hidden lg:flex items-center space-x-2">
                         {updateStatus ? (
-                            <span className="text-neutral-500">DB store successfully</span>
+                            <div className="flex items-center space-x-2 text-green-400">
+                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <span className="text-xs">Saved</span>
+                            </div>
                         ) : (
-                            <span>Unsaved changes, click save</span>
+                            <div className="flex items-center space-x-2 text-yellow-400">
+                                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                                <span className="text-xs">Unsaved</span>
+                            </div>
                         )}
                     </div>
-                    {/* Conditional render of the save button */}
-                    {!isAutoSave && (
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                        {!isAutoSave && (
+                            <button
+                                onClick={() => handleSave(true)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 text-xs font-medium ${
+                                    updateStatus 
+                                        ? 'bg-gray-600 cursor-not-allowed opacity-50' 
+                                        : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transform hover:scale-105'
+                                }`}
+                                disabled={updateStatus}
+                            >
+                                <FaSave className="w-3 h-3" />
+                                {updateStatus ? 'Saved' : 'Save'}
+                            </button>
+                        )}
+
                         <button
-                            onClick={() => handleSave(true)} // Pass true for manual save
-                            className={`text-xs lg:px-4 px-2 py-1 lg:py-2 rounded-lg transition ${updateStatus ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
-                            disabled={updateStatus}
+                            onClick={handleCopy}
+                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all duration-300 text-xs font-medium transform hover:scale-105"
                         >
-                            <FaSave className="inline-block mr-1" /> {updateStatus ? 'Saved' : 'Save'}
+                            <FaCopy className="w-3 h-3" />
+                            Copy
                         </button>
-                    )}
-                    <button
-                        onClick={handleCopy}
-                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
-                    >
-                        <FaCopy className="inline-block mr-2" /> Copy
-                    </button>
-                    <button
-                        onClick={handleShare}
-                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
-                    >
-                        <FaShare className="inline-block mr-2" /> Share
-                    </button>
-                    <button
-                        onClick={handleExportTxt}
-                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
-                    >
-                        <FaFileDownload className="inline-block mr-2" /> .txt
-                    </button>
-                    <button
-                        onClick={handleExportPdf}
-                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
-                    >
-                        <FaFilePdf className="inline-block mr-2" /> .pdf
-                    </button>
-                    <button
-                        onClick={handleRefresh}
-                        className="text-xs bg-slate-700 text-white lg:px-4 px-2 py-1 lg:py-2 rounded-lg hover:bg-slate-900 transition"
-                    >
-                        <FaSync className="inline-block mr-2" /> Refresh
-                    </button>
-                    {/* Auto Save Toggle */}
-                    <label className="hidden lg:inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={isAutoSave}
-                            onChange={handleToggleAutoSave}
-                        />
-                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Auto Save</span>
-                    </label>
+
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-lg transition-all duration-300 text-xs font-medium transform hover:scale-105"
+                        >
+                            <FaShare className="w-3 h-3" />
+                            Share
+                        </button>
+
+                        <button
+                            onClick={handleExportTxt}
+                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 rounded-lg transition-all duration-300 text-xs font-medium transform hover:scale-105"
+                        >
+                            <FaFileDownload className="w-3 h-3" />
+                            TXT
+                        </button>
+
+                        <button
+                            onClick={handleExportPdf}
+                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg transition-all duration-300 text-xs font-medium transform hover:scale-105"
+                        >
+                            <FaFilePdf className="w-3 h-3" />
+                            PDF
+                        </button>
+
+                        <button
+                            onClick={handleRefresh}
+                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-lg transition-all duration-300 text-xs font-medium transform hover:scale-105"
+                        >
+                            <FaSync className="w-3 h-3" />
+                            Refresh
+                        </button>
+
+                        {/* Auto Save Toggle */}
+                        <label className="hidden lg:flex items-center cursor-pointer space-x-2">
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={isAutoSave}
+                                onChange={handleToggleAutoSave}
+                            />
+                            <div className="relative w-9 h-5 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            <span className="text-xs font-medium text-gray-300">Auto</span>
+                        </label>
+                    </div>
                 </div>
             </header>
 
-            <div className="flex flex-1 pb-7">
-                <div className="w-full mx-auto shadow-lg">
-                    <textarea
-                        placeholder='Start typing here...'
-                        rows={20}
-                        value={description}
-                        onChange={handleChange}
-                        className='w-full min-h-full p-2 bg-gray-900 focus:outline-none focus:ring-2 focus:ring-transparent resize-none text-sm'
-                    />
+            {/* Main Content */}
+            <main className="relative z-10 flex-1 flex p-4 overflow-auto">
+                <div className="w-full max-w-6xl mx-auto flex flex-col h-full">
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg overflow-hidden flex-1 flex flex-col">
+                        <textarea
+                            placeholder='Start typing here...'
+                            value={description}
+                            onChange={handleChange}
+                            className='w-full h-full min-h-0 p-6 bg-transparent focus:outline-none focus:ring-0 resize-none text-base leading-relaxed placeholder-gray-400 flex-1'
+                        />
+                    </div>
                 </div>
-            </div>
+            </main>
 
+            {/* Toast Notifications */}
             <Toaster
                 position="bottom-right"
                 reverseOrder={false}
                 gutter={8}
                 toastOptions={{
                     style: {
-                        background: '#0a0a23',
+                        background: 'rgba(0, 0, 0, 0.9)',
                         color: 'white',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        fontSize: '14px',
                     },
+                    duration: 3000,
                 }}
             />
-            <div className="bg-gray-900 text-gray-600 p-1 text-center text-xs absolute bottom-0 w-full">
-                <a href='https://github.com/adnanalemran'>Developed by Adnan al Emran || 2024</a>
-            </div>
+
+            {/* Footer */}
+            <footer className="relative z-10 flex items-center justify-center px-6 py-3 text-xs text-gray-500 border-t border-white/10">
+                <a 
+                    href='https://github.com/adnanalemran' 
+                    className="hover:text-gray-300 transition-colors duration-300"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Made with ❤️ by Adnan
+                </a>
+            </footer>
         </div>
     );
 };
